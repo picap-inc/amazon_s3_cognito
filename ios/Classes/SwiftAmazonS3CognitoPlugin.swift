@@ -58,6 +58,8 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
               }
           }else if(call.method.elementsEqual("uploadImage")){
               uploadImageForRegion(call,result: result)
+          }else if(call.method.elementsEqual("downloadImage")){
+              downloadImageForRegion(call,result: result)
           }else if(call.method.elementsEqual("deleteImage")){
               deleteImage(call,result: result)
           }
@@ -95,10 +97,10 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
           let uploadRequest = AWSS3TransferManagerUploadRequest()
           uploadRequest?.bucket = bucket
           uploadRequest?.key = fileName
-          uploadRequest?.contentType = "image/jpeg"
+          //uploadRequest?.contentType = "image/jpeg"
           uploadRequest?.body = fileUrl as URL
-          uploadRequest
-          uploadRequest?.acl = .publicReadWrite
+          //uploadRequest
+          //uploadRequest?.acl = .publicReadWrite
 
 
           let credentialsProvider = AWSCognitoCredentialsProvider(
@@ -128,6 +130,63 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
               return nil
           }
       }
+
+      func downloadImageForRegion(_ call: FlutterMethodCall, result: @escaping FlutterResult){
+                let arguments = call.arguments as? NSDictionary
+                let imagePath = arguments!["filePath"] as? String
+                let bucket = arguments!["bucket"] as? String
+                let identity = arguments!["identity"] as? String
+                let fileName = arguments!["imageName"] as? String
+                let region = arguments!["region"] as? String
+                let subRegion = arguments!["subRegion"] as? String
+
+                print("region" + region!)
+
+                print("subregion " + subRegion!)
+                if(region != nil && subRegion != nil){
+                    initRegions(region: region!, subRegion: subRegion!)
+                }
+
+
+                var imageAmazonUrl = ""
+                let fileUrl = NSURL(fileURLWithPath: imagePath!)
+
+                let uploadRequest = AWSS3TransferManagerDownloadRequest()
+                uploadRequest?.bucket = bucket
+                uploadRequest?.key = fileName
+                //uploadRequest?.contentType = "image/jpeg"
+                uploadRequest?.downloadingFileURL = fileUrl as URL
+                //uploadRequest
+                //uploadRequest?.acl = .publicReadWrite
+
+
+                let credentialsProvider = AWSCognitoCredentialsProvider(
+                    regionType: region1,
+                    identityPoolId: identity!)
+                let configuration = AWSServiceConfiguration(
+                    region: subRegion1,
+                    credentialsProvider: credentialsProvider)
+                AWSServiceManager.default().defaultServiceConfiguration = configuration
+
+
+                AWSS3TransferManager.default().download(uploadRequest!).continueWith { (task) -> AnyObject? in
+                    if let error = task.error {
+                        print("❌ Download failed (\(error))")
+                    }
+
+
+                    if task.result != nil {
+
+
+                        imageAmazonUrl = imagePath!
+                        print("✅ Download successed (\(imageAmazonUrl))")
+                    } else {
+                        print("❌ Unexpected empty result.")
+                    }
+                    result(imageAmazonUrl)
+                    return nil
+                }
+            }
 
       func deleteImage(_ call: FlutterMethodCall, result: @escaping FlutterResult){
           let arguments = call.arguments as? NSDictionary
