@@ -25,24 +25,21 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
             let identity = arguments["identity"] as! String
 
             let fileUrl = URL(fileURLWithPath: imagePath)
-
-            let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast1, identityPoolId: identity)
-            let configuration = AWSServiceConfiguration(region:.USEast1, credentialsProvider:credentialsProvider)
-            AWSServiceManager.default().defaultServiceConfiguration = configuration
-
-            let tuConf = AWSS3TransferUtilityConfiguration()
-            tuConf.isAccelerateModeEnabled = false
-
-            AWSS3TransferUtility.register(
-                with: configuration!,
-                transferUtilityConfiguration: tuConf,
-                forKey: "transfer-utility-with-advanced-options"
-            )
-
+            if(AWSServiceManager.default().defaultServiceConfiguration == nil){
+                let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast1, identityPoolId: identity)
+                let configuration = AWSServiceConfiguration(region:.USEast1, credentialsProvider:credentialsProvider)
+                AWSServiceManager.default().defaultServiceConfiguration = configuration
+                let tuConf = AWSS3TransferUtilityConfiguration()
+                tuConf.isAccelerateModeEnabled = false
+                AWSS3TransferUtility.register(
+                    with: configuration!,
+                    transferUtilityConfiguration: tuConf,
+                    forKey: "transfer-utility-with-advanced-options"
+                )
+            }
             let transferUtility = AWSS3TransferUtility.s3TransferUtility(forKey: "transfer-utility-with-advanced-options")
 
             var  theProgress:Double = 0.0;
-
             let expression = AWSS3TransferUtilityUploadExpression()
             expression.progressBlock = {(task, progress) in
                 DispatchQueue.main.async(execute: {
@@ -61,6 +58,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
                         print("Error: \(error?.localizedDescription)")
                         result(nil)
                     }else if (theProgress < 1.0){
+                        print("Error: nunca terminó de cargar")
                         result(nil)
                     }else{
                         let imageAmazonUrl = "https://s3.amazonaws.com/\(bucket)/\(fileName)"
@@ -68,7 +66,6 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
                     }
                 })
             }
-
 
             var fileData:Data? = nil;
             do{
