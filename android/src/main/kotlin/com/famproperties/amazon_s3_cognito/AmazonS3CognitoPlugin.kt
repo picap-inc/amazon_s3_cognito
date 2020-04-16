@@ -1,6 +1,7 @@
 package com.famproperties.amazon_s3_cognito
 
 import android.content.Context
+import android.util.Log
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -41,7 +42,7 @@ class AmazonS3CognitoPlugin private constructor(private val context: Context) : 
 
                       System.out.println("\n❌ upload failed")
                       try{
-                          result.success("Failed")
+                          result.success(null)
                       }catch (e:Exception){
 
                       }

@@ -45,7 +45,8 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
         amazonS3Client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.US_EAST_1))
         transferUtility = TransferUtility(amazonS3Client, context)
 
-        nameOfUploadedFile = clean(image.name)
+        //nameOfUploadedFile = clean(image.name)
+        nameOfUploadedFile = image.name
         val transferObserver = transferUtility.upload(BUCKET_NAME, nameOfUploadedFile, image)
 
         transferObserver.setTransferListener(object : TransferListener {
@@ -58,7 +59,9 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
                 }
             }
 
-            override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
+            override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
+                Log.i("AwsHelper.%", (100*bytesCurrent/bytesTotal).toString());
+            }
             override fun onError(id: Int, ex: Exception) {
                 Log.e(TAG, "error in upload id [ " + id + " ] : " + ex.message)
             }
