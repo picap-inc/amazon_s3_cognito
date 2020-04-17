@@ -13,7 +13,6 @@ import java.io.UnsupportedEncodingException
 
 class AmazonS3CognitoPlugin private constructor(private val context: Context) : MethodCallHandler {
     private var awsHelper: AwsHelper? = null
-    private var awsRegionHelper: AwsRegionHelper? = null
 
 
     companion object {
@@ -59,81 +58,12 @@ class AmazonS3CognitoPlugin private constructor(private val context: Context) : 
           }
 
       } else if (call.method.equals("uploadImage")) {
-          val file = File(filePath)
-          try {
-              awsRegionHelper = AwsRegionHelper(context, object : AwsRegionHelper.OnUploadCompleteListener {
-                  override fun onFailed() {
-                      System.out.println("\n❌ upload failed")
-                      try{
-                          result.success("Failed")
-                      }catch (e:Exception){
 
-                      }
-
-                  }
-
-                  override fun onUploadComplete(@NotNull imageUrl: String) {
-                      System.out.println("\n✅ upload complete: $imageUrl")
-                      result.success(imageUrl)
-                  }
-              }, bucket!!, identity!!, fileName!!, region!!, subRegion!!)
-              awsRegionHelper!!.uploadImage(file)
-          } catch (e: UnsupportedEncodingException) {
-              e.printStackTrace()
-          }
 
       } else if (call.method.equals("downloadImage")) {
-          val file = File(filePath)
-          try {
-              awsRegionHelper = AwsRegionHelper(context, object : AwsRegionHelper.OnUploadCompleteListener {
-                  override fun onFailed() {
-                      System.out.println("\n❌ download failed")
-                      try{
-                          result.success("Failed")
-                      }catch (e:Exception){
 
-                      }
-
-                  }
-
-                  override fun onUploadComplete(@NotNull imageUrl: String) {
-                      System.out.println("\n✅ download complete: $imageUrl")
-                      result.success(imageUrl)
-                  }
-              }, bucket!!, identity!!, fileName!!, region!!, subRegion!!)
-              awsRegionHelper!!.downloadImage(file)
-          } catch (e: UnsupportedEncodingException) {
-              e.printStackTrace()
-          }
 
       } else if (call.method.equals("deleteImage")) {
-          try {
-              awsRegionHelper = AwsRegionHelper(context, object : AwsRegionHelper.OnUploadCompleteListener{
-
-                  override fun onFailed() {
-                      System.out.println("\n❌ delete failed")
-                      try{
-                          result.success("Failed")
-                      }catch (e:Exception){
-
-                      }
-
-                  }
-
-                  override fun onUploadComplete(@NotNull imageUrl: String) {
-                      System.out.println("\n✅ delete complete: $imageUrl")
-
-                      try{
-                          result.success(imageUrl)
-                      }catch (e:Exception){
-
-                      }
-                  }
-              }, bucket!!, identity!!, fileName!!, region!!, subRegion!!)
-              awsRegionHelper!!.deleteImage()
-          } catch (e: UnsupportedEncodingException) {
-              e.printStackTrace()
-          }
 
       } else {
           result.notImplemented()

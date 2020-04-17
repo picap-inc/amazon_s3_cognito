@@ -1,21 +1,18 @@
 package com.famproperties.amazon_s3_cognito
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import android.widget.Toast
-
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
+import com.amazonaws.mobile.config.AWSConfiguration
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtilityOptions
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3Client
-
 import java.io.File
 import java.io.UnsupportedEncodingException
-import java.util.Locale
+import java.util.*
 
 class AwsHelper(private val context: Context, private val onUploadCompleteListener: OnUploadCompleteListener, private val BUCKET_NAME: String, private val IDENTITY_POOL_ID: String) {
 
@@ -23,11 +20,13 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
     private var nameOfUploadedFile: String? = null
 
     init {
-        val credentialsProvider = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, Regions.US_EAST_1)
+        //val awsConfiguration = AWSConfiguration(context);
+        val awsConfiguration = AWSConfiguration(context);
+        val awsCreds = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, Regions.US_EAST_1)
+        val s3Client = AmazonS3Client(awsCreds)
+        transferUtility = TransferUtility.builder().context(context).awsConfiguration(awsConfiguration).s3Client(s3Client).build();
+        //transferUtility = TransferUtility(s3Client, context, "pichat-file", TransferUtilityOptions());
 
-        val amazonS3Client = AmazonS3Client(credentialsProvider)
-        amazonS3Client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.US_EAST_1))
-        transferUtility = TransferUtility(amazonS3Client, context)
     }
 
     private val uploadedUrl: String
@@ -39,12 +38,6 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
 
     @Throws(UnsupportedEncodingException::class)
     fun uploadImage(image: File): String {
-        val credentialsProvider = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, Regions.US_EAST_1)
-
-        val amazonS3Client = AmazonS3Client(credentialsProvider)
-        amazonS3Client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.US_EAST_1))
-        transferUtility = TransferUtility(amazonS3Client, context)
-
         //nameOfUploadedFile = clean(image.name)
         nameOfUploadedFile = image.name
         val transferObserver = transferUtility.upload(BUCKET_NAME, nameOfUploadedFile, image)
@@ -60,7 +53,7 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
             }
 
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
-                Log.i("AwsHelper.%", (100*bytesCurrent/bytesTotal).toString());
+                Log.i("AwsHelper.V2 %", (100*bytesCurrent/bytesTotal).toString());
             }
             override fun onError(id: Int, ex: Exception) {
                 Log.e(TAG, "error in upload id [ " + id + " ] : " + ex.message)
