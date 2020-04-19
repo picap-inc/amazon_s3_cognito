@@ -16,7 +16,7 @@ class AmazonS3Cognito {
       switch (handler.method) {
         case "progress" :
           if(onProgress != null)
-            onProgress(double.parse(handler.arguments));
+            onProgress(handler.arguments);
           break;
         default:
       }
