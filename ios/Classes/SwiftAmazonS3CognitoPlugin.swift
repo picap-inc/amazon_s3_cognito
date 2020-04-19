@@ -8,12 +8,17 @@ import MobileCoreServices
 
 public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
 
+    var channel:FlutterMethodChannel
     var region1:AWSRegionType = AWSRegionType.USEast1
     var subRegion1:AWSRegionType = AWSRegionType.EUWest1
 
+    init(channel: FlutterMethodChannel){
+        self.channel = channel
+    }
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "amazon_s3_cognito", binaryMessenger: registrar.messenger())
-        let instance = SwiftAmazonS3CognitoPlugin()
+        let instance = SwiftAmazonS3CognitoPlugin(channel: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
@@ -44,7 +49,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
             expression.progressBlock = {(task, progress) in
                 DispatchQueue.main.async(execute: {
                     theProgress = progress.fractionCompleted;
-                    print(progress.fractionCompleted*100);
+                    self.channel.invokeMethod("progress", arguments: progress.fractionCompleted*100)
                 })
             }
 

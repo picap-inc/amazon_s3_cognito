@@ -2,6 +2,7 @@ package com.famproperties.amazon_s3_cognito
 
 import android.content.Context
 import android.util.Log
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -11,15 +12,17 @@ import org.jetbrains.annotations.NotNull
 import java.io.File
 import java.io.UnsupportedEncodingException
 
-class AmazonS3CognitoPlugin private constructor(private val context: Context) : MethodCallHandler {
+class AmazonS3CognitoPlugin  private constructor(private val context: Context,private val channel: MethodChannel) : MethodCallHandler {
     private var awsHelper: AwsHelper? = null
 
+    //var channel: MethodChannel? = null
 
     companion object {
     @JvmStatic
     fun registerWith(registrar: Registrar) {
+
       val channel = MethodChannel(registrar.messenger(), "amazon_s3_cognito")
-        val instance = AmazonS3CognitoPlugin(registrar.context())
+        val instance = AmazonS3CognitoPlugin(registrar.context(), channel)
         channel.setMethodCallHandler(instance)
     }
   }
@@ -45,6 +48,10 @@ class AmazonS3CognitoPlugin private constructor(private val context: Context) : 
                       }catch (e:Exception){
 
                       }
+                  }
+
+                  override fun onProgress(progress: Long) {
+                      channel.invokeMethod("progress", progress.toString())
                   }
 
                   override fun onUploadComplete(@NotNull imageUrl: String) {

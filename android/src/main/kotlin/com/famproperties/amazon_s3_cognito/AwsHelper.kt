@@ -7,7 +7,6 @@ import com.amazonaws.mobile.config.AWSConfiguration
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtilityOptions
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3Client
 import java.io.File
@@ -53,7 +52,7 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
             }
 
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
-                Log.i("AwsHelper.V2 %", (100*bytesCurrent/bytesTotal).toString());
+                onUploadCompleteListener.onProgress((100*bytesCurrent/bytesTotal))
             }
             override fun onError(id: Int, ex: Exception) {
                 Log.e(TAG, "error in upload id [ " + id + " ] : " + ex.message)
@@ -70,6 +69,7 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
     interface OnUploadCompleteListener {
         fun onUploadComplete(imageUrl: String)
         fun onFailed()
+        fun onProgress(progress: Long)
     }
 
     companion object {
