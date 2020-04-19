@@ -51,7 +51,7 @@ class AmazonS3CognitoPlugin  private constructor(private val context: Context,pr
                   }
 
                   override fun onProgress(progress: Long) {
-                      channel.invokeMethod("progress", progress.toString())
+                      channel.invokeMethod("progress", progress)
                   }
 
                   override fun onUploadComplete(@NotNull imageUrl: String) {
