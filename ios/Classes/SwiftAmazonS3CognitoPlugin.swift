@@ -29,6 +29,10 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
             let bucket = arguments["bucket"] as! String
             let identity = arguments["identity"] as! String
 
+            var bucketParts = bucket.split(separator: "/");
+            let bucketRoot = String(bucketParts.remove(at: 0));
+            let bucketPath = bucketParts.joined(separator: "/")
+
             let fileUrl = URL(fileURLWithPath: imagePath)
             if(AWSServiceManager.default().defaultServiceConfiguration == nil){
                 let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast1, identityPoolId: identity)
@@ -53,7 +57,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
                 })
             }
 
-            let fileName = NSUUID().uuidString + "." + fileExtensionForPath(path: imagePath)
+            let fileName = bucketPath + "/" + NSUUID().uuidString + "." + fileExtensionForPath(path: imagePath)
             //let imageData = image.jpegData(compressionQuality: 0.9)
 
             var completionHandler: AWSS3TransferUtilityUploadCompletionHandlerBlock?
@@ -66,7 +70,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
                         print("Error: nunca terminó de cargar")
                         result(nil)
                     }else{
-                        let imageAmazonUrl = "https://s3.amazonaws.com/\(bucket)/\(fileName)"
+                        let imageAmazonUrl = "https://s3.amazonaws.com/\(bucketRoot)/\(fileName)"
                         result(imageAmazonUrl);
                     }
                 })
@@ -83,7 +87,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
             print(contentType)
             print(fileName)
             transferUtility?.uploadData(fileData!,
-                                        bucket: bucket,
+                                        bucket: bucketRoot,
                                         key: fileName,
                                         contentType: contentType,
                                         expression: expression,
