@@ -13,7 +13,12 @@ import java.io.File
 import java.io.UnsupportedEncodingException
 import java.util.*
 
-class AwsHelper(private val context: Context, private val onUploadCompleteListener: OnUploadCompleteListener, private val BUCKET_NAME: String, private val IDENTITY_POOL_ID: String) {
+class AwsHelper(
+    private val context: Context,
+    private val onUploadCompleteListener: OnUploadCompleteListener,
+    private val BUCKET_NAME: String,
+    private val IDENTITY_POOL_ID: String
+) {
 
     private var transferUtility: TransferUtility
     private var nameOfUploadedFile: String? = null
@@ -23,7 +28,8 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
         val awsConfiguration = AWSConfiguration(context);
         val awsCreds = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, Regions.US_EAST_1)
         val s3Client = AmazonS3Client(awsCreds)
-        transferUtility = TransferUtility.builder().context(context).awsConfiguration(awsConfiguration).s3Client(s3Client).build();
+        transferUtility =
+            TransferUtility.builder().context(context).awsConfiguration(awsConfiguration).s3Client(s3Client).build();
         //transferUtility = TransferUtility(s3Client, context, "pichat-file", TransferUtilityOptions());
 
     }
@@ -52,8 +58,9 @@ class AwsHelper(private val context: Context, private val onUploadCompleteListen
             }
 
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
-                onUploadCompleteListener.onProgress((100*bytesCurrent/bytesTotal))
+                onUploadCompleteListener.onProgress((100 * bytesCurrent / bytesTotal))
             }
+
             override fun onError(id: Int, ex: Exception) {
                 Log.e(TAG, "error in upload id [ " + id + " ] : " + ex.message)
             }
