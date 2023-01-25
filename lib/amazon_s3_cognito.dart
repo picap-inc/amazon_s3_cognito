@@ -11,7 +11,7 @@ class AmazonS3Cognito {
     return version;
   }
 
-  static Future<String> upload(String filepath, String bucket, String identity,
+  static Future<String?> upload(String filepath, String bucket, String identity,
       [Function(double)? onProgress]) async {
     final Map<String, dynamic> params = {
       'filePath': filepath,
@@ -27,7 +27,7 @@ class AmazonS3Cognito {
           break;
       }
     });
-    final String imagePath =
+    final String? imagePath =
         await _channel.invokeMethod('uploadImageToAmazon', params);
     return imagePath;
   }
