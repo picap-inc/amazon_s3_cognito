@@ -16,7 +16,6 @@ class AwsRegion {
   static const US_EAST_2 = "US_EAST_2";
   static const US_WEST_1 = "US_WEST_1";
   static const US_WEST_2 = "US_WEST_2";
-
   static const ME_SOUTH_1 = "ME_SOUTH_1";
   static const AP_EAST_1 = "AP_EAST_1";
   static const EU_NORTH_1 = "EU_NORTH_1";

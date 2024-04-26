@@ -4,8 +4,6 @@ import AWSS3
 import AWSCore
 import MobileCoreServices
 
-
-
 public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
 
     var channel:FlutterMethodChannel
@@ -23,7 +21,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if(call.method.elementsEqual("uploadImageToAmazon")){
+        if (call.method.elementsEqual("uploadImageToAmazon")) {
             let arguments = call.arguments as! NSDictionary
             let imagePath = arguments["filePath"] as! String
             let bucket = arguments["bucket"] as! String
@@ -34,7 +32,7 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
             let bucketPath = bucketParts.joined(separator: "/")
 
             let fileUrl = URL(fileURLWithPath: imagePath)
-            if(AWSServiceManager.default().defaultServiceConfiguration == nil){
+            if (AWSServiceManager.default().defaultServiceConfiguration == nil) {
                 let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast1, identityPoolId: identity)
                 let configuration = AWSServiceConfiguration(region:.USEast1, credentialsProvider:credentialsProvider)
                 AWSServiceManager.default().defaultServiceConfiguration = configuration
@@ -63,13 +61,13 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
             var completionHandler: AWSS3TransferUtilityUploadCompletionHandlerBlock?
             completionHandler = { (task, error) -> Void in
                 DispatchQueue.main.async(execute: {
-                    if (error != nil){
+                    if (error != nil) {
                         print("Error: \(error?.localizedDescription)")
                         result(nil)
-                    }else if (theProgress < 1.0){
+                    } else if (theProgress < 1.0) {
                         print("Error: nunca terminó de cargar")
                         result(nil)
-                    }else{
+                    } else {
                         let imageAmazonUrl = "https://s3.amazonaws.com/\(bucketRoot)/\(fileName)"
                         result(imageAmazonUrl);
                     }
@@ -103,11 +101,10 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
                                             }
                                             return nil;
             }
-
             //}
-        }else if(call.method.elementsEqual("uploadImage")){
+        } else if(call.method.elementsEqual("uploadImage")) {
             //uploadImageForRegion(call,result: result)
-        }else if(call.method.elementsEqual("deleteImage")){
+        } else if(call.method.elementsEqual("deleteImage")) {
             //deleteImage(call,result: result)
         }
     }
@@ -135,48 +132,45 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
     }
 
     public func getRegion( name:String ) -> AWSRegionType{
-
-        if(name == "US_EAST_1"){
+        if (name == "US_EAST_1") {
             return AWSRegionType.USEast1
-        }else if(name == "AP_SOUTHEAST_1"){
+        } else if(name == "AP_SOUTHEAST_1") {
             return AWSRegionType.APSoutheast1
-        }else if(name == "US_EAST_2"){
+        } else if(name == "US_EAST_2") {
             return AWSRegionType.USEast2
-        }else if(name == "EU_WEST_1"){
+        } else if(name == "EU_WEST_1") {
             return AWSRegionType.EUWest1
-        }else if(name == "CA_CENTRAL_1"){
+        } else if(name == "CA_CENTRAL_1") {
             return AWSRegionType.CACentral1
-        }else if(name == "CN_NORTH_1"){
+        } else if(name == "CN_NORTH_1") {
             return AWSRegionType.CNNorth1
-        } else if(name == "CN_NORTHWEST_1"){
+        } else if(name == "CN_NORTHWEST_1") {
             return AWSRegionType.CNNorthWest1
-        }else if(name == "EU_CENTRAL_1"){
+        } else if(name == "EU_CENTRAL_1") {
             return AWSRegionType.EUCentral1
         } else if(name == "EU_WEST_2"){
             return AWSRegionType.EUWest2
-        }else if(name == "EU_WEST_3"){
+        } else if(name == "EU_WEST_3") {
             return AWSRegionType.EUWest3
-        } else if(name == "SA_EAST_1"){
+        } else if(name == "SA_EAST_1") {
             return AWSRegionType.SAEast1
-        } else if(name == "US_WEST_1"){
+        } else if(name == "US_WEST_1") {
             return AWSRegionType.USWest1
-        }else if(name == "US_WEST_2"){
+        } else if(name == "US_WEST_2") {
             return AWSRegionType.USWest2
-        } else if(name == "AP_NORTHEAST_1"){
+        } else if(name == "AP_NORTHEAST_1") {
             return AWSRegionType.APNortheast1
-        } else if(name == "AP_NORTHEAST_2"){
+        } else if(name == "AP_NORTHEAST_2") {
             return AWSRegionType.APNortheast2
-        } else if(name == "AP_SOUTHEAST_1"){
+        } else if(name == "AP_SOUTHEAST_1") {
             return AWSRegionType.APSoutheast1
-        }else if(name == "AP_SOUTHEAST_2"){
+        } else if(name == "AP_SOUTHEAST_2") {
             return AWSRegionType.APSoutheast2
-        } else if(name == "AP_SOUTH_1"){
+        } else if(name == "AP_SOUTH_1") {
             return AWSRegionType.APSouth1
-        }else if(name == "ME_SOUTH_1"){
+        } else if(name == "ME_SOUTH_1") {
             return AWSRegionType.MESouth1
         }
-
         return AWSRegionType.Unknown
-
     }
 }
