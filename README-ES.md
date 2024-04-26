@@ -22,10 +22,10 @@ Para usar este complemento, agregue `amazon_s3_cognito` como dependencia en su a
 
 ```yaml
 dependencies:
-	amazon_s3_cognito:
-  		git:
-    		url: git@github.com:picap-inc/amazon_s3_cognito.git
-      		ref: main
+  amazon_s3_cognito:
+    git:
+      url: git@github.com:picap-inc/amazon_s3_cognito.git
+        ref: main
 ```
 <a name="demo"></a>
 ### Demo
