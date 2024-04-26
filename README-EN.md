@@ -21,10 +21,10 @@ To use this plugin, add `amazon_s3_cognito` as a dependency in your pubspec.yaml
 
 ```yaml
 dependencies:
-   amazon_s3_cognito:
-  	 git:
-    	url: git@github.com:picap-inc/amazon_s3_cognito.git
-      	ref: main
+  amazon_s3_cognito:
+    git:
+      url: git@github.com:picap-inc/amazon_s3_cognito.git
+      ref: main
 ```
 <a name="demo"></a>
 ### Demo

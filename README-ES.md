@@ -25,7 +25,7 @@ dependencies:
   amazon_s3_cognito:
     git:
       url: git@github.com:picap-inc/amazon_s3_cognito.git
-        ref: main
+      ref: main
 ```
 <a name="demo"></a>
 ### Demo
