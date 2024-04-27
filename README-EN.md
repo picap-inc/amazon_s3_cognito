@@ -15,7 +15,7 @@ This plugin comes from the repository [AmazonS3Cognito](https://github.com/prach
 * [Collaborators](#contributors)
 
 
-<a name="usage"></a>
+<a name="usage">usage</a>
 ## Usage
 To use this plugin, add `amazon_s3_cognito` as a dependency in your pubspec.yaml file
 
