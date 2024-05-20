@@ -24,14 +24,11 @@ class AwsHelper(
     private var nameOfUploadedFile: String? = null
 
     init {
-        //val awsConfiguration = AWSConfiguration(context);
         val awsConfiguration = AWSConfiguration(context);
         val awsCreds = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, Regions.US_EAST_1)
         val s3Client = AmazonS3Client(awsCreds)
         transferUtility =
             TransferUtility.builder().context(context).awsConfiguration(awsConfiguration).s3Client(s3Client).build();
-        //transferUtility = TransferUtility(s3Client, context, "pichat-file", TransferUtilityOptions());
-
     }
 
     private val uploadedUrl: String
