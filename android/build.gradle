@@ -1,69 +1,99 @@
-group 'com.famproperties.amazon_s3_cognito'
-version '1.0-SNAPSHOT'
+//group 'com.famproperties.amazon_s3_cognito'
+//version '1.0-SNAPSHOT'
+//
+//buildscript {
+//    ext.kotlin_version = '1.8.0'
+//    repositories {
+//        google()
+//        mavenCentral()
+//    }
+//
+//    dependencies {
+//        classpath 'com.android.tools.build:gradle:7.2.2'
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//    }
+//}
+//
+//rootProject.allprojects {
+//    repositories {
+//        google()
+//        mavenCentral()
+//    }
+//}
+//
+//apply plugin: 'com.android.library'
+//apply plugin: 'kotlin-android'
+//
+//android {
+//    namespace 'com.famproperties.amazon_s3_cognito'
+//    compileSdk 34
+//
+//    sourceSets {
+//        main.java.srcDirs += 'src/main/kotlin'
+//    }
+//    defaultConfig {
+//        minSdkVersion 21
+//        targetSdkVersion 34
+//        versionCode 1
+//        versionName '1.0'
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//    }
+//    lintOptions {
+//        disable 'InvalidPackage'
+//    }
+//    compileOptions {
+//        sourceCompatibility = 1.8
+//        targetCompatibility = 1.8
+//    }
+//
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//
+//    kotlinOptions {
+//        jvmTarget = JavaVersion.VERSION_1_8.toString()
+//    }
+//
+//    buildTypes {
+//        release {
+//            signingConfig signingConfigs.debug
+//        }
+//    }
+//}
 
-buildscript {
-    ext.kotlin_version = '1.8.0'
+
+// Generated file. Do not edit.
+
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
 }
 
-rootProject.allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 
 android {
     namespace 'com.famproperties.amazon_s3_cognito'
-    compileSdk 34
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
+    compileSdk = 35
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 34
-        versionCode 1
-        versionName '1.0'
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-    compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        minSdk = 23
+        targetSdk = 35
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-        }
+        jvmTarget = '17'
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation('com.amazonaws:aws-android-sdk-mobile-client:2.74.+@aar') { transitive = true }
     implementation 'com.amazonaws:aws-android-sdk-s3:2.74.+'
     implementation 'com.amazonaws:aws-android-sdk-cognito:2.20.+'
