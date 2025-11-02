@@ -88,7 +88,9 @@ class AwsHelper(
         get() = getUploadedUrl(nameOfUploadedFile)
 
     private fun getUploadedUrl(key: String?): String {
-        return String.format(Locale.getDefault(), URL_TEMPLATE, BUCKET_NAME, key)
+        // Extraer la región del Identity Pool ID (formato: "region:pool-id")
+        val region = IDENTITY_POOL_ID.split(":").firstOrNull() ?: "us-east-1"
+        return "https://$BUCKET_NAME.s3.$region.amazonaws.com/$key"
     }
 
     @Throws(UnsupportedEncodingException::class)
@@ -178,6 +180,5 @@ class AwsHelper(
 
     companion object {
         private val TAG = AwsHelper::class.java.simpleName
-        private const val URL_TEMPLATE = "https://s3.amazonaws.com/%s/%s"
     }
 }

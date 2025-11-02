@@ -191,7 +191,8 @@ public class SwiftAmazonS3CognitoPlugin: NSObject, FlutterPlugin {
                         self.sendLogToFlutter("❌ [iOS] Progreso final: \(theProgress * 100)%")
                         result(FlutterError(code: "UPLOAD_INCOMPLETE", message: "El upload no se completó", details: nil))
                     } else {
-                        let imageAmazonUrl = "https://s3.amazonaws.com/\(bucketRoot)/\(fileName)"
+                        // Generar URL con formato regional correcto
+                        let imageAmazonUrl = "https://\(bucketRoot).s3.\(identityRegion).amazonaws.com/\(fileName)"
                         self.sendLogToFlutter("✅ [iOS] Upload COMPLETADO exitosamente!")
                         self.sendLogToFlutter("🔗 [iOS] URL generada: \(imageAmazonUrl)")
                         result(imageAmazonUrl);
