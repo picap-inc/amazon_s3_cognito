@@ -36,32 +36,68 @@ class AmazonS3CognitoPlugin : FlutterPlugin, MethodCallHandler {
         val region = call.argument<String>("region")
         val subRegion = call.argument<String>("subRegion")
 
+        Log.d("AmazonS3Plugin", "🔵 Método llamado: ${call.method}")
+        Log.d("AmazonS3Plugin", "📁 FilePath recibido: $filePath")
+        Log.d("AmazonS3Plugin", "🗄️  Bucket recibido: $bucket")
+        Log.d("AmazonS3Plugin", "🆔 Identity Pool recibido: $identity")
 
         if (call.method.equals("uploadImageToAmazon")) {
+            if (filePath == null || bucket == null || identity == null) {
+                Log.e("AmazonS3Plugin", "❌ Parámetros faltantes!")
+                Log.e("AmazonS3Plugin", "FilePath es null: ${filePath == null}")
+                Log.e("AmazonS3Plugin", "Bucket es null: ${bucket == null}")
+                Log.e("AmazonS3Plugin", "Identity es null: ${identity == null}")
+                result.error("MISSING_PARAMS", "Faltan parámetros requeridos", null)
+                return
+            }
+
             val file = File(filePath)
+            Log.d("AmazonS3Plugin", "📂 Verificando archivo...")
+            Log.d("AmazonS3Plugin", "Archivo existe: ${file.exists()}")
+            Log.d("AmazonS3Plugin", "Archivo es legible: ${file.canRead()}")
+            Log.d("AmazonS3Plugin", "Tamaño del archivo: ${file.length()} bytes")
+
+            if (!file.exists()) {
+                Log.e("AmazonS3Plugin", "❌ El archivo no existe: $filePath")
+                result.error("FILE_NOT_FOUND", "El archivo no existe", null)
+                return
+            }
+
             try {
+                Log.d("AmazonS3Plugin", "🔧 Inicializando AwsHelper...")
                 awsHelper = AwsHelper(context, object : AwsHelper.OnUploadCompleteListener {
                     override fun onFailed() {
-                        System.out.println("\n❌ upload failed")
+                        Log.e("AmazonS3Plugin", "❌ Upload FALLÓ en callback onFailed()")
                         try {
                             result.success(null)
                         } catch (e: Exception) {
-
+                            Log.e("AmazonS3Plugin", "❌ Error al enviar resultado de fallo: ${e.message}")
                         }
                     }
 
                     override fun onProgress(progress: Long) {
+                        Log.d("AmazonS3Plugin", "📊 Progreso: $progress%")
                         channel.invokeMethod("progress", progress)
                     }
 
                     override fun onUploadComplete(imageUrl: String) {
-                        System.out.println("\n✅ upload complete: $imageUrl")
+                        Log.i("AmazonS3Plugin", "✅ Upload COMPLETADO exitosamente!")
+                        Log.i("AmazonS3Plugin", "🔗 URL resultante: $imageUrl")
                         result.success(imageUrl)
                     }
                 }, bucket!!, identity!!)
+
+                Log.d("AmazonS3Plugin", "🚀 Iniciando upload del archivo...")
                 awsHelper?.uploadImage(file)
+                Log.d("AmazonS3Plugin", "📤 Método uploadImage() llamado exitosamente")
             } catch (e: UnsupportedEncodingException) {
+                Log.e("AmazonS3Plugin", "❌ UnsupportedEncodingException: ${e.message}")
                 e.printStackTrace()
+                result.error("ENCODING_ERROR", e.message, null)
+            } catch (e: Exception) {
+                Log.e("AmazonS3Plugin", "❌ Excepción general: ${e.message}")
+                e.printStackTrace()
+                result.error("UPLOAD_ERROR", e.message, null)
             }
         } else if (call.method.equals("getPlatformVersion")) {
             result.success(android.os.Build.VERSION.RELEASE)

@@ -24,11 +24,64 @@ class AwsHelper(
     private var nameOfUploadedFile: String? = null
 
     init {
-        val awsConfiguration = AWSConfiguration(context);
-        val awsCreds = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, Regions.US_EAST_1)
-        val s3Client = AmazonS3Client(awsCreds)
-        transferUtility =
-            TransferUtility.builder().context(context).awsConfiguration(awsConfiguration).s3Client(s3Client).build();
+        Log.d(TAG, "🔧 Inicializando AwsHelper...")
+        Log.d(TAG, "🗄️  Bucket: $BUCKET_NAME")
+        Log.d(TAG, "🆔 Identity Pool ID: $IDENTITY_POOL_ID")
+
+        try {
+            Log.d(TAG, "📋 Creando AWSConfiguration...")
+            val awsConfiguration = AWSConfiguration(context)
+
+            // Auto-detectar la región desde el Identity Pool ID
+            val identityRegion = IDENTITY_POOL_ID.split(":").firstOrNull() ?: "us-east-1"
+            Log.d(TAG, "🌎 Región extraída del Identity Pool: $identityRegion")
+
+            val cognitoRegion = when (identityRegion) {
+                "us-east-1" -> {
+                    Log.d(TAG, "🌎 Región AUTO-DETECTADA: US_EAST_1")
+                    Regions.US_EAST_1
+                }
+                "us-east-2" -> {
+                    Log.d(TAG, "🌎 Región AUTO-DETECTADA: US_EAST_2")
+                    Regions.US_EAST_2
+                }
+                "us-west-1" -> {
+                    Log.d(TAG, "🌎 Región AUTO-DETECTADA: US_WEST_1")
+                    Regions.US_WEST_1
+                }
+                "us-west-2" -> {
+                    Log.d(TAG, "🌎 Región AUTO-DETECTADA: US_WEST_2")
+                    Regions.US_WEST_2
+                }
+                "eu-west-1" -> {
+                    Log.d(TAG, "🌎 Región AUTO-DETECTADA: EU_WEST_1")
+                    Regions.EU_WEST_1
+                }
+                else -> {
+                    Log.w(TAG, "⚠️  Región no reconocida: $identityRegion, usando US_EAST_1 por defecto")
+                    Regions.US_EAST_1
+                }
+            }
+
+            Log.d(TAG, "🔑 Creando CognitoCachingCredentialsProvider con región: $cognitoRegion")
+            val awsCreds = CognitoCachingCredentialsProvider(context, IDENTITY_POOL_ID, cognitoRegion)
+
+            Log.d(TAG, "☁️  Creando AmazonS3Client...")
+            val s3Client = AmazonS3Client(awsCreds)
+
+            Log.d(TAG, "🚀 Construyendo TransferUtility...")
+            transferUtility = TransferUtility.builder()
+                .context(context)
+                .awsConfiguration(awsConfiguration)
+                .s3Client(s3Client)
+                .build()
+
+            Log.i(TAG, "✅ AwsHelper inicializado exitosamente!")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error al inicializar AwsHelper: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     private val uploadedUrl: String
@@ -40,29 +93,76 @@ class AwsHelper(
 
     @Throws(UnsupportedEncodingException::class)
     fun uploadImage(image: File): String {
+        Log.d(TAG, "📤 Iniciando uploadImage()...")
+        Log.d(TAG, "📁 Nombre del archivo: ${image.name}")
+        Log.d(TAG, "📏 Tamaño del archivo: ${image.length()} bytes")
+        Log.d(TAG, "📂 Ruta completa: ${image.absolutePath}")
+
         //nameOfUploadedFile = clean(image.name)
         nameOfUploadedFile = image.name
-        val transferObserver = transferUtility.upload(BUCKET_NAME, nameOfUploadedFile, image)
+        Log.d(TAG, "🏷️  Nombre del archivo a subir: $nameOfUploadedFile")
 
-        transferObserver.setTransferListener(object : TransferListener {
-            override fun onStateChanged(id: Int, state: TransferState) {
-                if (state == TransferState.COMPLETED) {
-                    onUploadCompleteListener.onUploadComplete(getUploadedUrl(nameOfUploadedFile))
+        try {
+            Log.d(TAG, "🚀 Llamando transferUtility.upload()...")
+            Log.d(TAG, "   - Bucket: $BUCKET_NAME")
+            Log.d(TAG, "   - Key: $nameOfUploadedFile")
+            val transferObserver = transferUtility.upload(BUCKET_NAME, nameOfUploadedFile, image)
+            Log.d(TAG, "✅ TransferObserver creado con ID: ${transferObserver.id}")
+
+            transferObserver.setTransferListener(object : TransferListener {
+                override fun onStateChanged(id: Int, state: TransferState) {
+                    Log.d(TAG, "🔄 Estado cambiado para transfer ID [$id]: $state")
+
+                    if (state == TransferState.COMPLETED) {
+                        val uploadedUrl = getUploadedUrl(nameOfUploadedFile)
+                        Log.i(TAG, "✅ UPLOAD COMPLETADO!")
+                        Log.i(TAG, "🔗 URL generada: $uploadedUrl")
+                        onUploadCompleteListener.onUploadComplete(uploadedUrl)
+                    }
+
+                    if (state == TransferState.FAILED) {
+                        Log.e(TAG, "❌ UPLOAD FALLÓ - Estado: FAILED")
+                        onUploadCompleteListener.onFailed()
+                    }
+
+                    if (state == TransferState.CANCELED) {
+                        Log.w(TAG, "⚠️  Upload cancelado")
+                    }
+
+                    if (state == TransferState.IN_PROGRESS) {
+                        Log.d(TAG, "⏳ Upload en progreso...")
+                    }
+
+                    if (state == TransferState.WAITING || state == TransferState.WAITING_FOR_NETWORK) {
+                        Log.d(TAG, "⏸️  Upload esperando (red o recursos)...")
+                    }
+
+                    if (state == TransferState.PAUSED) {
+                        Log.w(TAG, "⏸️  Upload pausado")
+                    }
                 }
-                if (state == TransferState.FAILED) {
-                    onUploadCompleteListener.onFailed()
+
+                override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
+                    val progress = (100 * bytesCurrent / bytesTotal)
+                    Log.d(TAG, "📊 Progreso ID [$id]: $progress% ($bytesCurrent/$bytesTotal bytes)")
+                    onUploadCompleteListener.onProgress(progress)
                 }
-            }
 
-            override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
-                onUploadCompleteListener.onProgress((100 * bytesCurrent / bytesTotal))
-            }
+                override fun onError(id: Int, ex: Exception) {
+                    Log.e(TAG, "❌ ERROR en upload ID [$id]!")
+                    Log.e(TAG, "❌ Mensaje de error: ${ex.message}")
+                    Log.e(TAG, "❌ Tipo de excepción: ${ex.javaClass.simpleName}")
+                    ex.printStackTrace()
+                }
+            })
 
-            override fun onError(id: Int, ex: Exception) {
-                Log.e(TAG, "error in upload id [ " + id + " ] : " + ex.message)
-            }
-        })
-        return uploadedUrl
+            Log.d(TAG, "🔗 URL esperada al completar: $uploadedUrl")
+            return uploadedUrl
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Excepción al iniciar upload: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     @Throws(UnsupportedEncodingException::class)
