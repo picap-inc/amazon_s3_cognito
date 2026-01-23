@@ -16,16 +16,27 @@ import java.util.*
 class AwsHelper(
     private val context: Context,
     private val onUploadCompleteListener: OnUploadCompleteListener,
-    private val BUCKET_NAME: String,
+    private val BUCKET_PATH: String,
     private val IDENTITY_POOL_ID: String
 ) {
 
     private var transferUtility: TransferUtility
     private var nameOfUploadedFile: String? = null
 
+    // Separar bucket real del folder path
+    private val actualBucket: String
+    private val folderPath: String?
+
     init {
+        // El BUCKET_PATH puede venir como "bucket/folder" o solo "bucket"
+        val parts = BUCKET_PATH.split("/", limit = 2)
+        actualBucket = parts[0]
+        folderPath = if (parts.size > 1) parts[1] else null
+
         Log.d(TAG, "🔧 Inicializando AwsHelper...")
-        Log.d(TAG, "🗄️  Bucket: $BUCKET_NAME")
+        Log.d(TAG, "🗄️  Bucket recibido: $BUCKET_PATH")
+        Log.d(TAG, "🗄️  Bucket real: $actualBucket")
+        Log.d(TAG, "📂 Folder path: $folderPath")
         Log.d(TAG, "🆔 Identity Pool ID: $IDENTITY_POOL_ID")
 
         try {
@@ -87,10 +98,12 @@ class AwsHelper(
     private val uploadedUrl: String
         get() = getUploadedUrl(nameOfUploadedFile)
 
-    private fun getUploadedUrl(key: String?): String {
+    private fun getUploadedUrl(fileName: String?): String {
         // Extraer la región del Identity Pool ID (formato: "region:pool-id")
         val region = IDENTITY_POOL_ID.split(":").firstOrNull() ?: "us-east-1"
-        return "https://$BUCKET_NAME.s3.$region.amazonaws.com/$key"
+        // Construir el key completo: folder/filename o solo filename
+        val fullKey = if (folderPath != null) "$folderPath/$fileName" else fileName
+        return "https://$actualBucket.s3.$region.amazonaws.com/$fullKey"
     }
 
     @Throws(UnsupportedEncodingException::class)
@@ -102,13 +115,18 @@ class AwsHelper(
 
         //nameOfUploadedFile = clean(image.name)
         nameOfUploadedFile = image.name
+
+        // Construir el key completo: folder/filename o solo filename
+        val fullKey = if (folderPath != null) "$folderPath/$nameOfUploadedFile" else nameOfUploadedFile
+
         Log.d(TAG, "🏷️  Nombre del archivo a subir: $nameOfUploadedFile")
+        Log.d(TAG, "🔑 Key completo: $fullKey")
 
         try {
             Log.d(TAG, "🚀 Llamando transferUtility.upload()...")
-            Log.d(TAG, "   - Bucket: $BUCKET_NAME")
-            Log.d(TAG, "   - Key: $nameOfUploadedFile")
-            val transferObserver = transferUtility.upload(BUCKET_NAME, nameOfUploadedFile, image)
+            Log.d(TAG, "   - Bucket: $actualBucket")
+            Log.d(TAG, "   - Key: $fullKey")
+            val transferObserver = transferUtility.upload(actualBucket, fullKey, image)
             Log.d(TAG, "✅ TransferObserver creado con ID: ${transferObserver.id}")
 
             transferObserver.setTransferListener(object : TransferListener {
